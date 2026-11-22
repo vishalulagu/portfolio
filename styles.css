@@ -237,6 +237,11 @@ svg {
   margin-left: 4px;
 }
 
+.btn--primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 .btn--email {
   background: var(--fill);
   min-width: 224px;
@@ -418,7 +423,7 @@ svg {
   flex-wrap: wrap;
   margin-bottom: clamp(20px, 3vw, 30px);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: clamp(14px, 1.2vw, 16px);
   font-weight: 500;
   letter-spacing: 0.1em;
   line-height: 1.5;
@@ -426,10 +431,10 @@ svg {
 }
 
 .status-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   background: var(--ink);
-  flex: 0 0 7px;
+  flex: 0 0 8px;
   animation: status-pulse 2.6s ease-in-out infinite;
 }
 
@@ -444,7 +449,7 @@ svg {
 
 .hero h1 {
   font-family: var(--font-sans);
-  font-size: clamp(3.5rem, 8.2vw, 7.5rem);
+  font-size: clamp(3rem, 6.5vw, 5.75rem);
   font-weight: 800;
   line-height: 0.86;
   letter-spacing: -0.055em;
@@ -1358,7 +1363,7 @@ h2 {
 
 @media (max-width: 980px) {
   .hero h1 {
-    font-size: clamp(3.75rem, 13vw, 5.25rem);
+    font-size: clamp(3rem, 10vw, 4.5rem);
   }
 
   .hero-grid {
@@ -1502,7 +1507,7 @@ h2 {
   }
 
   .hero h1 {
-    font-size: clamp(3.6rem, 15vw, 4.5rem);
+    font-size: clamp(2.8rem, 12vw, 3.8rem);
   }
 
   .hero-grid {
