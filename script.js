@@ -290,4 +290,261 @@
       }
     });
   });
+
+  /* ------------------------------------------------------------------------
+     Interactive ID Badge & Lanyard Elastic Physics
+     ------------------------------------------------------------------------ */
+
+  (function initIdBadgePhysics() {
+    var idBadge = document.getElementById("idBadge");
+    var cardFlipper = document.getElementById("cardFlipper");
+    var strapLeft = document.getElementById("strapLeft");
+    var stitchLeft = document.getElementById("stitchLeft");
+    var strapRight = document.getElementById("strapRight");
+    var stitchRight = document.getElementById("stitchRight");
+    var portraitLanyard = document.querySelector(".portrait-lanyard");
+
+    if (!idBadge || !cardFlipper) return;
+
+    // Physics coordinates & velocities
+    var x = 0, y = 0;
+    var vx = 0, vy = 0;
+    var rotZ = 0, vRotZ = 0;
+    var rotX = 0;
+    var rotY = 0, vRotY = 0;
+    var targetRotY = 0;
+
+    var isDragging = false;
+    var startPointerX = 0, startPointerY = 0;
+    var lastPointerX = 0, lastPointerY = 0;
+    var lastMoveTime = 0;
+    var pointerVelX = 0, pointerVelY = 0;
+    var totalDragDist = 0;
+
+    var isRunning = false;
+
+    // Lively, free rubber elasticity constants
+    var STIFFNESS = 0.058;   // Natural elastic rubber tension
+    var DAMPING = 0.83;      // Bouncy, lively oscillation
+    var ROT_STIFFNESS = 0.052;
+    var ROT_DAMPING = 0.80;
+    var FLIP_STIFFNESS = 0.075;
+    var FLIP_DAMPING = 0.76;
+
+    var portraitLanyard = document.querySelector(".portrait-lanyard");
+
+    function renderLanyard(cardX, cardY, angleZ) {
+      if (!strapLeft || !strapRight || !portraitLanyard) return;
+
+      var lanyardRect = portraitLanyard.getBoundingClientRect();
+      var lWidth = lanyardRect.width || 260;
+      var lHeight = lanyardRect.height || 120;
+
+      var scaleX = 260 / lWidth;
+      var scaleY = 120 / lHeight;
+
+      var svgDx = cardX * scaleX;
+      var svgDy = cardY * scaleY;
+
+      // The buckle apex in SVG viewBox space
+      var curApexX = 130 + svgDx;
+      var curApexY = 102 + svgDy;
+
+      var axStr = curApexX.toFixed(2);
+      var ayStr = curApexY.toFixed(2);
+
+      // Left strap polygon & stitch line (stays anchored to navbar at y=0)
+      strapLeft.setAttribute(
+        "points",
+        "15,0 47,0 " + (curApexX + 10).toFixed(2) + "," + ayStr + " " + (curApexX - 14).toFixed(2) + "," + ayStr
+      );
+      if (stitchLeft) {
+        stitchLeft.setAttribute("x2", (curApexX - 2).toFixed(2));
+        stitchLeft.setAttribute("y2", ayStr);
+      }
+
+      // Right strap polygon & stitch line (stays anchored to navbar at y=0)
+      strapRight.setAttribute(
+        "points",
+        "245,0 213,0 " + (curApexX - 10).toFixed(2) + "," + ayStr + " " + (curApexX + 14).toFixed(2) + "," + ayStr
+      );
+      if (stitchRight) {
+        stitchRight.setAttribute("x2", (curApexX + 2).toFixed(2));
+        stitchRight.setAttribute("y2", ayStr);
+      }
+    }
+
+    // Entrance Drop Animation from top (behind navbar)
+    var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!prefersReducedMotion) {
+      y = -360;
+      rotZ = -8;
+      cardFlipper.style.transform = "translate3d(0, -360px, 0) rotateZ(-8deg)";
+      renderLanyard(0, -360, -8);
+
+      // Delayed release drop on entrance
+      window.setTimeout(function () {
+        vy = 4;
+        vRotZ = 1.5;
+        startPhysics();
+      }, 250);
+    }
+
+    function step() {
+      if (!isDragging) {
+        // Hooke's law spring: F = -k * displacement
+        var fx = -STIFFNESS * x;
+        var fy = -STIFFNESS * y;
+        vx = (vx + fx) * DAMPING;
+        vy = (vy + fy) * DAMPING;
+        x += vx;
+        y += vy;
+
+        // Angular tilt spring
+        var fRotZ = -ROT_STIFFNESS * rotZ;
+        vRotZ = (vRotZ + fRotZ) * ROT_DAMPING;
+        rotZ += vRotZ;
+
+        // RotX spring to 0
+        rotX += (0 - rotX) * 0.16;
+      }
+
+      // RotY spring (flip front/back: 0 or 180)
+      var fRotY = -FLIP_STIFFNESS * (rotY - targetRotY);
+      vRotY = (vRotY + fRotY) * FLIP_DAMPING;
+      rotY += vRotY;
+
+      // Apply 3D transform to card flipper
+      cardFlipper.style.transform =
+        "translate3d(" + x.toFixed(2) + "px, " + y.toFixed(2) + "px, 0) " +
+        "rotateZ(" + rotZ.toFixed(2) + "deg) " +
+        "rotateY(" + rotY.toFixed(2) + "deg) " +
+        "rotateX(" + rotX.toFixed(2) + "deg)";
+
+      var isFlipped = (Math.abs(rotY % 360) > 90 && Math.abs(rotY % 360) < 270);
+      idBadge.classList.toggle("is-flipped", isFlipped);
+
+      // Update the flexible lanyard ribbon
+      renderLanyard(x, y, rotZ);
+
+      // Check if settled to rest
+      var atRest =
+        !isDragging &&
+        Math.abs(x) < 0.08 && Math.abs(vx) < 0.04 &&
+        Math.abs(y) < 0.08 && Math.abs(vy) < 0.04 &&
+        Math.abs(rotZ) < 0.08 && Math.abs(vRotZ) < 0.04 &&
+        Math.abs(rotY - targetRotY) < 0.08 && Math.abs(vRotY) < 0.04;
+
+      if (!atRest) {
+        window.requestAnimationFrame(step);
+      } else {
+        x = 0; y = 0; vx = 0; vy = 0;
+        rotZ = 0; vRotZ = 0;
+        rotX = 0; rotY = targetRotY; vRotY = 0;
+        cardFlipper.style.transform =
+          "translate3d(0, 0, 0) rotateZ(0deg) rotateY(" + targetRotY + "deg) rotateX(0deg)";
+        renderLanyard(0, 0, 0);
+        isRunning = false;
+      }
+    }
+
+    function startPhysics() {
+      if (!isRunning) {
+        isRunning = true;
+        window.requestAnimationFrame(step);
+      }
+    }
+
+    // Pointer Drag & Toss Events
+    idBadge.addEventListener("pointerdown", function (e) {
+      if (e.button !== 0 && e.pointerType === "mouse") return;
+      isDragging = true;
+      idBadge.classList.add("is-dragging");
+      try {
+        idBadge.setPointerCapture(e.pointerId);
+      } catch (err) {}
+
+      startPointerX = e.clientX;
+      startPointerY = e.clientY;
+      lastPointerX = e.clientX;
+      lastPointerY = e.clientY;
+      lastMoveTime = performance.now();
+      pointerVelX = 0;
+      pointerVelY = 0;
+      totalDragDist = 0;
+
+      vx = 0;
+      vy = 0;
+      vRotZ = 0;
+      startPhysics();
+    });
+
+    window.addEventListener("pointermove", function (e) {
+      if (!isDragging) return;
+
+      var now = performance.now();
+      var dt = Math.max(1, now - lastMoveTime);
+      lastMoveTime = now;
+
+      pointerVelX = ((e.clientX - lastPointerX) / dt) * 16.6;
+      pointerVelY = ((e.clientY - lastPointerY) / dt) * 16.6;
+      lastPointerX = e.clientX;
+      lastPointerY = e.clientY;
+
+      var rawDx = e.clientX - startPointerX;
+      var rawDy = e.clientY - startPointerY;
+      var dist = Math.hypot(rawDx, rawDy);
+      totalDragDist = Math.max(totalDragDist, dist);
+
+      // Free, lightweight rubber drag resistance (natural 1:1 feel near resting pos)
+      var resistance = 1 / (1 + Math.max(0, dist - 70) * 0.0009);
+      x = rawDx * resistance;
+      y = rawDy * resistance;
+
+      // Free swinging pendulum tilt & dynamic 3D perspective tilt
+      rotZ = (x / 140) * 26;
+      rotX = -(y / 180) * 16;
+
+      startPhysics();
+    });
+
+    function endDrag(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      idBadge.classList.remove("is-dragging");
+
+      try {
+        idBadge.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+
+      // If clicked/tapped with minimal movement, flip the card!
+      if (totalDragDist < 8) {
+        targetRotY = targetRotY === 0 ? 180 : 0;
+      } else {
+        // High-energy toss & release inertia
+        vx = Math.max(-42, Math.min(42, pointerVelX * 0.82));
+        vy = Math.max(-42, Math.min(42, pointerVelY * 0.82));
+        vRotZ = vx * 0.5;
+      }
+
+      startPhysics();
+    }
+
+    function toggleFlip() {
+      targetRotY = targetRotY === 0 ? 180 : 0;
+      startPhysics();
+    }
+
+    idBadge.flipCard = toggleFlip;
+    idBadge.setAttribute("tabindex", "0");
+    idBadge.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFlip();
+      }
+    });
+
+    idBadge.addEventListener("pointerup", endDrag);
+    idBadge.addEventListener("pointercancel", endDrag);
+  })();
 })();
