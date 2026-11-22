@@ -9,7 +9,7 @@
   --body: #4A4A4A;
   --muted: #555555;
   --fill: #D4D4D4;
-  --dot: #C8C8C8;
+  --dot: rgba(0, 0, 0, 0.22);
 
   --line: 1.5px solid var(--ink);
   --line-strong: 2.5px solid var(--ink);
@@ -37,10 +37,12 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
   background-color: var(--paper);
   background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
   background-size: 24px 24px;
@@ -56,6 +58,14 @@ body {
 ::selection {
   background: var(--ink);
   color: var(--paper);
+}
+
+.section--dark::selection,
+.section--dark *::selection,
+.site-footer::selection,
+.site-footer *::selection {
+  background: var(--paper);
+  color: var(--ink);
 }
 
 h1, h2, h3, p, figure, blockquote, ul {
@@ -402,7 +412,8 @@ svg {
    ========================================================================== */
 
 .hero {
-  padding-block: clamp(48px, 7vw, 88px) clamp(64px, 9vw, 116px);
+  padding-top: clamp(48px, 7vw, 88px);
+  padding-bottom: 0;
 }
 
 .hero-grid {
@@ -410,6 +421,7 @@ svg {
   grid-template-columns: minmax(0, 1.28fr) minmax(280px, 0.72fr);
   align-items: center;
   gap: clamp(40px, 6vw, 88px);
+  margin-bottom: clamp(44px, 6vw, 76px);
 }
 
 .hero-copy {
@@ -555,8 +567,6 @@ svg {
   height: 100%;
   object-fit: cover;
   object-position: top center;
-  filter: grayscale(100%) contrast(1.08);
-  transition: filter 0.4s ease;
 }
 
 .portrait-caption {
@@ -575,38 +585,70 @@ svg {
   line-height: 1;
 }
 
-.portrait-hint {
+/* ==========================================================================
+   Hero Marquee / Ticker
+   ========================================================================== */
+
+.hero-marquee {
+  width: 100%;
+  overflow: hidden;
+  background: #000000;
+  border-top: 1.5px solid #000000;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.18);
+  padding: 14px 0;
+  user-select: none;
+}
+
+.hero-marquee::selection,
+.hero-marquee *::selection {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee-scroll 45s linear infinite;
+}
+
+.hero-marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  text-align: right;
+  flex-shrink: 0;
+  gap: 28px;
+  padding-right: 28px;
 }
 
-.portrait-hint::before {
-  content: "";
-  width: 5px;
-  height: 5px;
-  background: var(--ink);
-  flex: 0 0 5px;
+.marquee-item {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  white-space: nowrap;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .portrait-frame:hover .portrait-img {
-    filter: grayscale(0%) contrast(1);
+.marquee-sep {
+  font-size: 11px;
+  line-height: 1;
+  color: #888888;
+  flex-shrink: 0;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
   }
-}
-
-.portrait-frame.is-color .portrait-img {
-  filter: grayscale(0%) contrast(1);
-}
-
-.portrait-frame.is-touch .portrait-media {
-  cursor: pointer;
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* ==========================================================================
@@ -616,6 +658,207 @@ svg {
 .section {
   border-top: var(--line);
   padding-block: var(--section-y);
+}
+
+/* ==========================================================================
+   Alternating Dark Sections (Black with white dots)
+   ========================================================================== */
+
+.section--dark {
+  background-color: #000000;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.28) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+  background-position: 0 0;
+  color: #FFFFFF;
+  border-top: 1.5px solid #000000;
+}
+
+.section--dark .section-label {
+  color: #FFFFFF;
+}
+
+.section--dark .section-label::before {
+  background: #FFFFFF;
+}
+
+.section--dark h2 {
+  color: #FFFFFF;
+}
+
+.section--dark .head-note {
+  color: #A0A0A0;
+  border-top-color: rgba(255, 255, 255, 0.25);
+}
+
+.section--dark .section-intro {
+  color: #C4C4C4;
+}
+
+/* About in dark section */
+.section--dark .rail-meta {
+  color: #A0A0A0;
+  border-top-color: rgba(255, 255, 255, 0.25);
+}
+
+.section--dark .about-lead {
+  color: #D4D4D4;
+}
+
+.section--dark .focus-card {
+  background: #000000;
+  border: 1.5px solid #FFFFFF;
+  color: #FFFFFF;
+}
+
+.section--dark .focus-title {
+  color: #FFFFFF;
+}
+
+.section--dark .focus-desc {
+  color: #B8B8B8;
+}
+
+.section--dark .focus-mark {
+  border: 1.5px solid #FFFFFF;
+  color: #FFFFFF;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .section--dark .focus-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 #FFFFFF;
+  }
+
+  .section--dark .focus-card:hover .focus-mark {
+    background: #FFFFFF;
+    color: #000000;
+  }
+}
+
+/* Projects in dark section */
+.section--dark .project-card {
+  background: #000000;
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 5px 5px 0 #FFFFFF;
+  color: #FFFFFF;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .section--dark .project-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 8px 8px 0 #FFFFFF;
+  }
+}
+
+.section--dark .card-meta {
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+.section--dark .card-date {
+  color: #A0A0A0;
+}
+
+.section--dark .project-title {
+  color: #FFFFFF;
+}
+
+.section--dark .project-subtitle {
+  color: #A0A0A0;
+}
+
+.section--dark .tech-tags li {
+  background: #000000;
+  border: 1.5px solid #FFFFFF;
+  color: #FFFFFF;
+}
+
+.section--dark .project-points li {
+  color: #D4D4D4;
+}
+
+.section--dark .project-points li::before {
+  background: #FFFFFF;
+}
+
+.section--dark .project-actions .btn {
+  background: #FFFFFF;
+  color: #000000;
+  border: 1.5px solid #FFFFFF;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .section--dark .project-actions .btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 #FFFFFF;
+  }
+}
+
+.section--dark .project-actions .btn:active,
+.section--dark .project-actions .btn.is-clicked {
+  background: #000000;
+  color: #FFFFFF;
+  box-shadow: none;
+}
+
+/* Contact in dark section */
+.section--dark .contact-panel {
+  background: #000000;
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 8px 8px 0 #FFFFFF;
+}
+
+.section--dark .contact-line {
+  color: #D4D4D4;
+}
+
+.section--dark .contact-meta {
+  border-top: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #A0A0A0;
+}
+
+.section--dark .contact-actions .btn {
+  background: #000000;
+  color: #FFFFFF;
+  border: 1.5px solid #FFFFFF;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .section--dark .contact-actions .btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 #FFFFFF;
+  }
+}
+
+.section--dark .contact-actions .btn:active,
+.section--dark .contact-actions .btn.is-clicked {
+  background: #FFFFFF;
+  color: #000000;
+  box-shadow: none;
+}
+
+.section--dark .contact-actions .btn--email {
+  background: #181818;
+  color: #FFFFFF;
+  border: 1.5px solid #FFFFFF;
+}
+
+.section--dark .contact-actions .btn--email.is-copied {
+  background: #FFFFFF;
+  color: #000000;
+}
+
+.section--dark .contact-actions .btn--resume {
+  background: #FFFFFF;
+  color: #000000;
+  border: 1.5px solid #FFFFFF;
+}
+
+.section--dark .contact-actions .btn--resume:active,
+.section--dark .contact-actions .btn--resume.is-clicked {
+  background: #000000;
+  color: #FFFFFF;
+  box-shadow: none;
 }
 
 .section-label {
@@ -1273,8 +1516,8 @@ h2 {
    ========================================================================== */
 
 .site-footer {
-  border-top: var(--line);
-  background: var(--paper);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: #000000;
 }
 
 .footer-inner {
@@ -1294,7 +1537,7 @@ h2 {
   font-weight: 500;
   letter-spacing: 0.09em;
   line-height: 1.6;
-  color: #333;
+  color: #A0A0A0;
 }
 
 .footer-top {
@@ -1304,11 +1547,12 @@ h2 {
   text-decoration: underline;
   text-decoration-thickness: 1.5px;
   text-underline-offset: 4px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: color 0.15s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .footer-top:hover {
+    color: #FFFFFF;
     text-decoration-thickness: 2px;
     text-underline-offset: 5px;
   }
@@ -1363,22 +1607,21 @@ h2 {
 
 @media (max-width: 980px) {
   .hero h1 {
-    font-size: clamp(3rem, 10vw, 4.5rem);
+    font-size: clamp(2.8rem, 9vw, 4.25rem);
   }
 
   .hero-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 48px;
+    gap: 36px;
   }
 
   .hero-portrait {
+    order: -1;
     justify-self: center;
     align-items: center;
-    max-width: 340px;
-  }
-
-  .portrait-hint {
-    text-align: center;
+    width: 100%;
+    max-width: min(300px, 75vw);
+    margin-inline: auto;
   }
 }
 
@@ -1498,20 +1741,67 @@ h2 {
 
 @media (max-width: 560px) {
   :root {
-    --header-h: 66px;
-    --section-y: 58px;
+    --header-h: 64px;
+    --section-y: clamp(48px, 9vw, 64px);
   }
 
   .hero {
-    padding-block: 40px 64px;
-  }
-
-  .hero h1 {
-    font-size: clamp(2.8rem, 12vw, 3.8rem);
+    padding-top: 24px;
+    padding-bottom: 0;
   }
 
   .hero-grid {
-    gap: 40px;
+    gap: 24px;
+    margin-bottom: 26px;
+  }
+
+  .hero-marquee {
+    padding: 11px 0;
+  }
+
+  .marquee-group {
+    gap: 18px;
+    padding-right: 18px;
+  }
+
+  .marquee-item {
+    font-size: 11.5px;
+  }
+
+  .marquee-sep {
+    font-size: 9.5px;
+  }
+
+  .hero-portrait {
+    order: -1;
+    width: 100%;
+    max-width: min(260px, 70vw);
+    margin-inline: auto;
+  }
+
+  .portrait-caption {
+    font-size: 10.5px;
+    padding: 0 10px;
+    letter-spacing: 0.08em;
+  }
+
+  .hero-status {
+    margin-bottom: 12px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.4rem, 11vw, 3.25rem);
+  }
+
+  .hero-subtitle {
+    margin-top: 14px;
+    font-size: 1.05rem;
+  }
+
+  .hero-intro {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.58;
   }
 
   .hero-actions {
@@ -1542,20 +1832,12 @@ h2 {
     font-size: 10.5px;
   }
 
-  .hero-portrait {
-    max-width: 100%;
-  }
-
-  .portrait-hint {
-    font-size: 10px;
-  }
-
   .about-body h2 {
     max-width: 14ch;
   }
 
   .about-lead {
-    font-size: 16px;
+    font-size: 15.5px;
     line-height: 1.65;
   }
 
@@ -1566,16 +1848,42 @@ h2 {
   .skills-toolbar {
     align-items: flex-start;
     flex-direction: column;
+    gap: 12px;
   }
 
   .filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
     width: 100%;
   }
 
   .btn--filter {
-    flex: 1 1 auto;
-    padding: 0 12px;
-    font-size: 11.5px;
+    width: 100%;
+    height: 42px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+
+  .skills-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .skill-tile {
+    padding: 14px 10px;
+    min-height: 96px;
+    gap: 8px;
+  }
+
+  .skill-icon {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+
+  .skill-name {
+    font-size: 10px;
   }
 
   .project-card,
@@ -1609,6 +1917,10 @@ h2 {
   .contact-panel {
     padding: 22px 20px 24px;
     box-shadow: 6px 6px 0 var(--ink);
+  }
+
+  .section--dark .contact-panel {
+    box-shadow: 6px 6px 0 #FFFFFF;
   }
 
   .contact-actions {
@@ -1647,21 +1959,22 @@ h2 {
 
 @media (max-width: 380px) {
   .wordmark {
-    font-size: 15px;
-    letter-spacing: 0.1em;
+    font-size: 14.5px;
+    letter-spacing: 0.08em;
   }
 
   .section-label {
-    font-size: 11.5px;
+    font-size: 11px;
   }
 
-  .filters {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .hero-portrait {
+    max-width: 240px;
   }
 
-  .btn--filter {
-    width: 100%;
+  .portrait-caption {
+    font-size: 9.5px;
+    padding: 0 8px;
+    letter-spacing: 0.06em;
   }
 }
 
@@ -1699,8 +2012,7 @@ h2 {
   .hero-actions,
   .project-actions,
   .contact-actions,
-  .footer-top,
-  .portrait-hint {
+  .footer-top {
     display: none !important;
   }
 
