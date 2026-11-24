@@ -644,8 +644,30 @@
       }
     }
 
-    // Start handwriting after a short 250ms visual pause on entry
-    var startT = window.setTimeout(typeNextChar, 250);
-    timeouts.push(startT);
+    // Wait until Caveat handwritten font is 100% loaded before writing first character.
+    // This completely eliminates FOUT (Flash of Unstyled Text) where standard font shifts to handwriting mid-animation.
+    function startTypingWhenFontReady() {
+      if (document.fonts && document.fonts.load) {
+        Promise.race([
+          document.fonts.load('700 32px Caveat'),
+          new Promise(function (resolve) { window.setTimeout(resolve, 600); })
+        ]).then(function () {
+          if (!isDone) {
+            var t = window.setTimeout(typeNextChar, 160);
+            timeouts.push(t);
+          }
+        }).catch(function () {
+          if (!isDone) {
+            var t = window.setTimeout(typeNextChar, 160);
+            timeouts.push(t);
+          }
+        });
+      } else {
+        var startT = window.setTimeout(typeNextChar, 250);
+        timeouts.push(startT);
+      }
+    }
+
+    startTypingWhenFontReady();
   })();
 })();
