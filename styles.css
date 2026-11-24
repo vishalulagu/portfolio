@@ -46,6 +46,8 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
 }
 
 body {
@@ -2427,11 +2429,6 @@ h2 {
    Intro Splash Animation (Hello! Professionals -> Center Split Reveal)
    ========================================================================== */
 
-body.intro-active {
-  overflow: hidden !important;
-  height: 100vh !important;
-}
-
 .intro-overlay {
   position: fixed;
   inset: 0;
@@ -2444,6 +2441,7 @@ body.intro-active {
   pointer-events: auto;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: none;
   cursor: pointer;
 }
 

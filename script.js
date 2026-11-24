@@ -579,6 +579,13 @@
       return;
     }
 
+    // Lock scrolling during intro without hiding scrollbar or shifting viewport layout width
+    function preventScroll(e) {
+      e.preventDefault();
+    }
+    window.addEventListener("wheel", preventScroll, { passive: false });
+    window.addEventListener("touchmove", preventScroll, { passive: false });
+
     var phrase = "Hello! Professionals";
     var index = 0;
     var isDone = false;
@@ -605,6 +612,8 @@
 
         // Step 3: Curtains have fully cleared screen -> now drop the ID badge!
         var cleanupTimer = window.setTimeout(function () {
+          window.removeEventListener("wheel", preventScroll);
+          window.removeEventListener("touchmove", preventScroll);
           document.body.classList.remove("intro-active");
           introOverlay.style.display = "none";
 
