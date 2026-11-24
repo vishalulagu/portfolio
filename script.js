@@ -376,18 +376,32 @@
 
     // Entrance Drop Animation from top (behind navbar)
     var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var hasDropped = false;
+
+    function triggerBadgeDrop() {
+      if (hasDropped) return;
+      hasDropped = true;
+      if (prefersReducedMotion) return;
+      y = -360;
+      rotZ = -8;
+      cardFlipper.style.transform = "translate3d(0, -360px, 0) rotateZ(-8deg)";
+      renderLanyard(0, -360, -8);
+
+      vy = 5;
+      vRotZ = 2;
+      startPhysics();
+    }
+
     if (!prefersReducedMotion) {
       y = -360;
       rotZ = -8;
       cardFlipper.style.transform = "translate3d(0, -360px, 0) rotateZ(-8deg)";
       renderLanyard(0, -360, -8);
 
-      // Delayed release drop on entrance
-      window.setTimeout(function () {
-        vy = 4;
-        vRotZ = 1.5;
-        startPhysics();
-      }, 250);
+      // Listen for intro reveal event when curtains split
+      window.addEventListener("reveal-hero", triggerBadgeDrop, { once: true });
+      // Safety fallback in case intro overlay was removed or skipped
+      window.setTimeout(triggerBadgeDrop, 7000);
     }
 
     function step() {
@@ -546,5 +560,92 @@
 
     idBadge.addEventListener("pointerup", endDrag);
     idBadge.addEventListener("pointercancel", endDrag);
+  })();
+
+  /* ------------------------------------------------------------------------
+     Intro Splash Animation (Hello! Professionals -> Center Split Reveal)
+     ------------------------------------------------------------------------ */
+
+  (function initIntroAnimation() {
+    var introOverlay = document.getElementById("introOverlay");
+    var introText = document.getElementById("introText");
+    if (!introOverlay || !introText) return;
+
+    var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      document.body.classList.remove("intro-active");
+      introOverlay.style.display = "none";
+      window.dispatchEvent(new CustomEvent("reveal-hero"));
+      return;
+    }
+
+    var phrase = "Hello! Professionals";
+    var index = 0;
+    var isDone = false;
+    var timeouts = [];
+
+    function clearAllTimeouts() {
+      for (var i = 0; i < timeouts.length; i++) {
+        clearTimeout(timeouts[i]);
+      }
+      timeouts = [];
+    }
+
+    function finishAndSplit() {
+      if (isDone) return;
+      isDone = true;
+      clearAllTimeouts();
+
+      // Step 1: Smoothly fade out handwriting words
+      introOverlay.classList.add("is-fading");
+
+      // Step 2: Split background (top slides up, bottom slides down)
+      var splitTimer = window.setTimeout(function () {
+        introOverlay.classList.add("is-split");
+
+        // Step 3: Curtains have fully cleared screen -> now drop the ID badge!
+        var cleanupTimer = window.setTimeout(function () {
+          document.body.classList.remove("intro-active");
+          introOverlay.style.display = "none";
+
+          // Full reveal is complete: now trigger the ID card entrance drop
+          window.dispatchEvent(new CustomEvent("reveal-hero"));
+        }, 940);
+        timeouts.push(cleanupTimer);
+      }, 380);
+      timeouts.push(splitTimer);
+    }
+
+    // Click anywhere or press any key to skip
+    introOverlay.addEventListener("click", finishAndSplit);
+    window.addEventListener("keydown", function onKey() {
+      window.removeEventListener("keydown", onKey);
+      finishAndSplit();
+    });
+
+    // Step 0: Fluid handwriting letter-by-letter typing
+    function typeNextChar() {
+      if (isDone) return;
+      if (index < phrase.length) {
+        introText.textContent += phrase.charAt(index);
+        index++;
+
+        var char = phrase.charAt(index - 1);
+        // Natural handwriting pacing with subtle jitter
+        var delay = (char === "!" || char === " ") ? 110 : (50 + Math.random() * 35);
+        var t = window.setTimeout(typeNextChar, delay);
+        timeouts.push(t);
+      } else {
+        // Finished writing! Wait 2 seconds as requested ("aprom 2 sec wait aagittu")
+        var waitT = window.setTimeout(function () {
+          finishAndSplit();
+        }, 2000);
+        timeouts.push(waitT);
+      }
+    }
+
+    // Start handwriting after a short 250ms visual pause on entry
+    var startT = window.setTimeout(typeNextChar, 250);
+    timeouts.push(startT);
   })();
 })();

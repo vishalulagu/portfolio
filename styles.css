@@ -2413,3 +2413,141 @@ h2 {
     font-size: 10px;
   }
 }
+
+/* ==========================================================================
+   Intro Splash Animation (Hello! Professionals -> Center Split Reveal)
+   ========================================================================== */
+
+body.intro-active {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+
+.intro-curtain {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: calc(50% + 1px);
+  background: #000000;
+  will-change: transform;
+  transition: transform 0.9s cubic-bezier(0.77, 0, 0.175, 1);
+  z-index: 1;
+  border: none;
+  outline: none;
+}
+
+.intro-curtain--top {
+  top: 0;
+}
+
+.intro-curtain--bottom {
+  bottom: 0;
+}
+
+/* Center Split: Top half slides UP, Bottom half slides DOWN */
+.intro-overlay.is-split .intro-curtain--top {
+  transform: translateY(-100%);
+}
+
+.intro-overlay.is-split .intro-curtain--bottom {
+  transform: translateY(100%);
+}
+
+.intro-stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  pointer-events: none;
+  padding: 20px;
+  width: 100%;
+  max-width: 90vw;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+/* Fade out handwriting text before split */
+.intro-overlay.is-fading .intro-stage {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+}
+
+.intro-text-box {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  min-height: 1.2em;
+}
+
+.intro-text {
+  font-family: "Caveat", "Dancing Script", "Segoe Script", cursive, var(--font-sans);
+  font-size: clamp(2.6rem, 7.5vw, 5rem);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.15);
+}
+
+.intro-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 0.85em;
+  background: #ffffff;
+  margin-left: 5px;
+  transform: translateY(2px);
+  animation: intro-cursor-blink 0.65s step-start infinite;
+}
+
+@keyframes intro-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.intro-hint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  opacity: 0;
+  animation: intro-hint-fadein 0.8s ease forwards 1.2s;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+@keyframes intro-hint-fadein {
+  to { opacity: 0.75; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .intro-overlay:hover .intro-hint {
+    opacity: 1;
+    color: #ffffff;
+  }
+}
+

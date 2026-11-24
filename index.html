@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" href="./favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
   <script src="./script.js" defer></script>
   <script type="application/ld+json">
@@ -42,7 +42,21 @@
     }
   </script>
 </head>
-<body id="top">
+<body id="top" class="intro-active">
+  <!-- =========================================================================
+       Intro Splash Animation (Hello! Professionals -> Center Split Reveal)
+       ========================================================================= -->
+  <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Welcome Intro">
+    <div class="intro-curtain intro-curtain--top" aria-hidden="true"></div>
+    <div class="intro-curtain intro-curtain--bottom" aria-hidden="true"></div>
+    <div class="intro-stage" id="introStage">
+      <div class="intro-text-box">
+        <span class="intro-text" id="introText"></span><span class="intro-cursor" id="introCursor" aria-hidden="true"></span>
+      </div>
+      <p class="intro-hint" id="introHint">Click anywhere to skip</p>
+    </div>
+  </div>
+
   <a class="skip-link" href="#main">SKIP TO CONTENT</a>
 
   <header class="site-header" id="site-header">
